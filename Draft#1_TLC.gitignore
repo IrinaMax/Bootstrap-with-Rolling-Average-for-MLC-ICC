@@ -142,5 +142,5 @@ max.5us
 max.20us <- max(max.1.20us$maxVal)
 max.20us
 
-df <- data.frame(max.1us, max.5us, max.20us)
-df
+result <- data.frame(max.1us, max.5us, max.20us)
+result
