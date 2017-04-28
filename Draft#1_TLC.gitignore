@@ -1,0 +1,146 @@
+library(dplyr)
+library(data.table)
+library(zoo)
+library(ggplot2)
+
+m2 <-  read.table("/Users/38923/Desktop/Raw DataV- 1Z128GbX3/prog/mlc/pp_program_MLC_B2_X2_D0_T001_B0000_P004_MP_3_80V_25_icc.dat")
+m2 %>% head
+tail(m2)
+m2 %>% dim()
+m2 %>% summary()
+hist_m2 <- hist.default(m1$V2, plot=TRUE, main = 'hist2' )
+
+m_a2<-rollmean(m2$V2, 100) # rolling mean per microsec us
+t2 <-rollmean(m2$V1, 100)  # timing
+t2 <- as.data.frame(t2)
+m2 %>% head   # head of the file m1
+m_a2 %>% head # head of means in rolling procidure
+t2 %>% head
+
+hist.default(m2$V2, plot = TRUE)
+hist.default(m_a2, plot = TRUE, main= "witn MA")
+m_a2 %>% summary
+dim(m_a2)
+m_a2 <- as.data.frame(m_a2)
+n.m2 <- cbind(t2, m_a2)
+
+plm2 <- ggplot(m2, aes(x = V1, y=V2 )) + 
+  geom_line(aes( alpha = 0.4,color = 1), title(main = "Plot file#2 of B2"))
+plm2
+#after avaraging
+pl2 <- ggplot(n.m2, aes(x = t2, y=m_a2 , color= 'red')) +geom_line()
+pl2
+
+#pl1.den <- ggplot(n.m1, aes(x = t1, y= m_a1)) +geom_density(aes(color = 6), position = "identity", geom = "line")
+#pl1.den
+pl_2 <- ggplot(m2, aes(x = V1, y= V2, color= 'red')) +geom_smooth()
+
+pl_2
+pl_a2 <- ggplot(n.m2, aes(x = t2, y= m_a2, color= 'red')) +geom_smooth(method = 'auto')
+pl_a2
+
+require(zoo)
+#for 1 us tial
+
+# use rollapply to calculate function along a moving window 
+# width is the width of the window
+
+m2.MA<- rollapply( m2$V2 , width = 20 , by = 1 , mean )
+m2.MA %>% head
+hist.default(m2.MA)
+
+# Now we use replicate to repeatedly evaluate a bootstrap sampling method
+# 'n' is number of replications
+n <- 100
+m2.resamp.100.20 <- as.data.frame(replicate( n , rollapply( m2.MA$V2 , width = n , 
+                                                         function(x) mean( x[ sample(length(x) , repl = TRUE) ] ) ) ) )
+
+summary(m2.resamp.100.20)
+max.2.1us <- as.data.frame(apply(m2.resamp.100.20, 2, max))
+max.2.1us %>%  names
+
+names(max.2.20us)[1] <- "maxVal"
+plot(max.2.20us$maxVal)
+hist.default(max.2.20us$maxVal)
+
+# for 1us require(zoo)-----------------------
+require(zoo)
+# use rollapply to calculate function along a moving window 
+# width is the width of the window
+
+m2.MA1us<- rollapply( m1$V2 , width = 20 , by = 1 , mean )
+m2.MA1us %>% head
+hist.default(m2.MA1us)
+
+# Now we use replicate to repeatedly evaluate a bootstrap sampling method
+# 'n' is number of replications
+
+m2.resamp.100.20 %>% head
+m2.resamp.100.20 %>% dim()
+summary(m2.resamp.100.20)
+max.2.1us <- as.data.frame(apply(m2.resamp.100.20, 2, max))
+max.2.1us %>%  names
+
+names(max.2.1us)[1] <- "maxVal"
+plot(max.2.1us$maxVal)
+hist.default(max.2.1us$maxVal)
+#done with 1us
+
+# for 5us -----------------
+
+# use rollapply to calculate function along a moving window 
+# width is the width of the window
+
+m2.MA5us<- rollapply( m1$V2 , width = 100 , by = 1 , mean )
+m2.MA5us %>% head
+hist.default(m2.MA5us)
+
+# Now we use replicate to repeatedly evaluate a bootstrap sampling method
+# 'n' is number of replications
+n <- 100
+resamp.100.100 <- as.data.frame(replicate( n , rollapply( m1.MA5us , width = n , 
+                                                          
+                                                          function(x) mean( x[ sample(length(x) , repl = TRUE) ] ) ) ) )
+
+summary(resamp.100.100)
+resamp.100.100 %>%  dim
+max.1.5us <- as.data.frame(apply(resamp.100.100, 2, max))
+max.1.5us %>%  names
+
+names(max.1.5us)[1] <- "maxVal"
+plot(max.1.5us$maxVal)
+hist.default(max.1.5us$maxVal)
+
+# for 20us--------------------------
+
+# use rollapply to calculate function along a moving window 
+# width is the width of the window
+
+m1.MA20us<- rollapply( m1$V2 , width = 400 , by = 1 , mean )
+m1.MA20us %>% head
+hist.default(m1.MA20us)
+
+# Now we use replicate to repeatedly evaluate a bootstrap sampling method
+# 'n' is number of replications
+n <- 100
+resamp.100.400 <- as.data.frame(replicate( n , rollapply( m1.MA20us , width = n , 
+                                                          function(x) mean( x[ sample(length(x) , repl = TRUE) ] ) ) ) )
+resamp.100.400 %>% dim
+summary(resamp.100.400)
+max.1.20us <- as.data.frame(apply(resamp.100.400, 2, max))
+max.1.20us %>%  names
+
+names(max.1.20us)[1] <- "maxVal"
+plot(max.1.20us$maxVal)
+hist.default(max.1.20us$maxVal)
+
+max.1us <- max(max.1.1us$maxVal)
+max.1us
+max.1us %>% str
+max.5us <- max(max.1.5us$maxVal)
+max.5us
+max.20us <- max(max.1.20us$maxVal)
+max.20us
+
+df <- data.frame(max.1us, max.5us, max.20us)
+df
